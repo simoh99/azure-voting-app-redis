@@ -8,7 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code 
-        uses: actions/checkout@v3  
+        uses: actions/checkout@v3
+      - name: ACR build
+        id: build-push-acr
+        uses: azure/acr-build@v1
+        with:
+          service_principal: ${{ secrets.service_principal }}
+          service_principal_password: ${{ secrets.service_principal_password }}
+          tenant: ${{ secrets.tenant }}
+          registry: ${{ secrets.registre }}
+          repository: ${{ secrets.repository }}
+          image:  azure-vote-front
+          folder: azure-vote
+          branch: master
+          tag: ${{ github.sha }}
       - name: Azure login
         id: login
         uses: azure/login@v1.4.3
@@ -30,5 +43,5 @@ jobs:
           namespace: 'default'
           manifests: |
              azure-vote-all-in-one-redis.yaml
-          images: 'mcr.microsoft.com/azuredocs/azure-vote-front:v1'
+          images: '${{ secrets.registry }}.azurecr.io/azure-vote-front:${{ github.sha }}'
           pull-images: false
